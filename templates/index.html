@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillVerse Career Matcher & Resume Builder</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome İkonlar -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card-bg {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+        }
+        .role-card {
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+        }
+        .role-card:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .selected-card {
+            border-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+            box-shadow: 0 0 0 2px #93c5fd;
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease-in-out, stroke 0.5s ease-in-out;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Modern Rəngli CV Çap Stili */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #cv-modal-content, #cv-modal-content * {
+                visibility: visible;
+            }
+            #cv-modal-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- Header və Əsas Naviqasiya Düymələri -->
+        <header class="text-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 flex items-center justify-center gap-3">
+                <i class="fa-solid fa-compass text-blue-600"></i>
+                SkillVerse Career Matcher
+            </h1>
+            <p class="text-slate-500 mt-2 text-sm md:text-base">
+                Hədəflədiyin İT sahəsini seç, bildiyin alətləri qeyd et, uyğunluq dərəcəni öyrən və peşəkar CV hazırla!
+            </p>
+            
+            <!-- Bölmə Keçid Düymələri -->
+            <div class="flex justify-center gap-4 mt-6">
+                <button 
+                    onclick="switchTab('matcher')" 
+                    id="tab-matcher" 
+                    class="px-6 py-3 rounded-xl font-semibold bg-blue-600 text-white shadow-sm flex items-center gap-2 transition cursor-pointer"
+                >
+                    <i class="fa-solid fa-chart-simple"></i>
+                    1. Karyera Analizi
+                </button>
+                <button 
+                    onclick="switchTab('cv-builder')" 
+                    id="tab-cv" 
+                    class="px-6 py-3 rounded-xl font-semibold bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200 flex items-center gap-2 transition cursor-pointer"
+                >
+                    <i class="fa-solid fa-file-pdf text-red-500"></i>
+                    2. Avtomatik CV Hazırla
+                </button>
+            </div>
+        </header>
+
+        <!-- BÖLMƏ 1: Karyera Analizi -->
+        <div id="section-matcher" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Sol Panel: Seçimlər -->
+            <div class="lg:col-span-6 space-y-6">
+                
+                <!-- 1. Hədəf Peşə -->
+                <div class="card-bg p-6 rounded-2xl">
+                    <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <span class="text-red-500">🎯</span>
+                        1. Hədəf Peşə İstiqamətini Seç
+                    </h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="roles-grid">
+                        <div onclick="selectRole('backend', this)" class="role-card p-3 rounded-xl cursor-pointer transition">
+                            <i class="fa-solid fa-server text-blue-600 text-xl mb-1"></i>
+                            <div class="font-medium text-sm text-slate-800">Backend Dev</div>
+                        </div>
+                        <div onclick="selectRole('frontend', this)" class="role-card p-3 rounded-xl cursor-pointer transition">
+                            <i class="fa-solid fa-code text-blue-600 text-xl mb-1"></i>
+                            <div class="font-medium text-sm text-slate-800">Frontend Dev</div>
+                        </div>
+                        <div onclick="selectRole('fullstack', this)" class="role-card p-3 rounded-xl cursor-pointer transition">
+                            <i class="fa-solid fa-layer-group text-blue-600 text-xl mb-1"></i>
+                            <div class="font-medium text-sm text-slate-800">Full Stack Dev</div>
+                        </div>
+                        <div onclick="selectRole('data_analyst', this)" class="role-card p-3 rounded-xl cursor-pointer transition">
+                            <i class="fa-solid fa-chart-pie text-blue-600 text-xl mb-1"></i>
+                            <div class="font-medium text-sm text-slate-800">Data Analyst</div>
+                        </div>
+                        <div onclick="selectRole('cybersecurity', this)" class="role-card p-3 rounded-xl cursor-pointer transition selected-card">
+                            <i class="fa-solid fa-shield-halved text-blue-600 text-xl mb-1"></i>
+                            <div class="font-medium text-sm text-slate-800">Kibertəhlükəsizlik</div>
+                        </div>
+                        <div onclick="selectRole('ai_ml', this)" class="role-card p-3 rounded-xl cursor-pointer transition">
+                            <i class="fa-solid fa-brain text-blue-600 text-xl mb-1"></i>
+                            <div class="font-medium text-sm text-slate-800">Süni İntellekt / ML</div>
+                        </div>
+                        <div onclick="selectRole('devops', this)" class="role-card p-3 rounded-xl cursor-pointer transition">
+                            <i class="fa-solid fa-cloud text-blue-600 text-xl mb-1"></i>
+                            <div class="font-medium text-sm text-slate-800">DevOps / Cloud</div>
+                        </div>
+                        <div onclick="selectRole('mobile', this)" class="role-card p-3 rounded-xl cursor-pointer transition">
+                            <i class="fa-solid fa-mobile-screen text-blue-600 text-xl mb-1"></i>
+                            <div class="font-medium text-sm text-slate-800">Mobil Tətbiq</div>
+                        </div>
+                        <div onclick="selectRole('embedded', this)" class="role-card p-3 rounded-xl cursor-pointer transition">
+                            <i class="fa-solid fa-microchip text-blue-600 text-xl mb-1"></i>
+                            <div class="font-medium text-sm text-slate-800">Embedded Sys.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Bildiyin Alətlər -->
+                <div class="card-bg p-6 rounded-2xl">
+                    <h2 class="text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                        <span class="text-emerald-500">✔</span>
+                        2. Bildiyin Alətləri Qeyd Et
+                    </h2>
+                    <p class="text-xs text-slate-500 mb-4">Siyahıdan mənimsədiyin texnologiyaları işarələ:</p>
+                    
+                    <div class="grid grid-cols-2 gap-3 text-sm" id="skills-container">
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="Python" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Python</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="SQL" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">SQL</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="Flask" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Flask</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="Docker" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Docker</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="Git" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Git</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="HTML/CSS" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">HTML/CSS</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="JavaScript" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">JavaScript</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="React" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">React</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="Pandas/NumPy" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Pandas/NumPy</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="PowerBI/Tableau" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">PowerBI/Tableau</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="C++" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">C++</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="Linux" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Linux</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="Networking" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Networking</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="PyTorch/TensorFlow" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">PyTorch/TensorFlow</span>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" value="Kubernetes" class="skill-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-slate-700">Kubernetes</span>
+                        </label>
+                    </div>
+
+                    <button id="calc-btn" onclick="calculateMatch()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow-sm transition flex items-center justify-center gap-2 active:scale-95">
+                        <i class="fa-solid fa-calculator"></i>
+                        Uyğunluğu Hesabla
+                    </button>
+                </div>
+
+            </div>
+
+<!-- Sağ Panel: Nəticələr və Ağıllı Analiz -->
+            <div class="lg:col-span-6 space-y-6">
+                
+                <div class="card-bg p-6 rounded-2xl space-y-6">
+                    
+                    <!-- Əsas Uyğunluq və Başlıq -->
+                    <div class="flex flex-col sm:flex-row items-center gap-6 border-b border-slate-200 pb-6">
+                        <div class="relative w-32 h-32 flex-shrink-0 flex items-center justify-center">
+                            <svg class="w-full h-full" viewBox="0 0 100 100">
+                                <circle class="text-slate-200" stroke-width="8" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
+                                <circle id="progress-circle" class="text-blue-600 progress-ring-circle" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50"/>
+                            </svg>
+                            <div class="absolute flex flex-col items-center justify-center text-center">
+                                <span id="match-score" class="text-2xl font-bold text-slate-800">0%</span>
+                                <span class="text-[10px] text-slate-500">Uyğunluq</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 id="role-title" class="text-xl font-bold text-slate-800">Bir Peşə Seçin</h3>
+                            <p id="role-desc" class="text-xs text-slate-500 mt-1">Nəticələri görmək üçün soldan peşə və alətləri seçib hesablayın.</p>
+                            <span id="status-tag" class="inline-block mt-3 px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                                Gözlənilir...
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 🤖 Ağıllı Məsləhətçi Mühərriki -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-robot text-purple-600"></i>
+                            Ağıllı Məsləhətçi Analizi
+                        </h4>
+                        <div class="space-y-2 text-xs">
+                            <div class="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200">
+                                <span class="text-emerald-700 font-semibold">Mənimsədiyiniz Bacarıqlar:</span>
+                                <p id="matched-list" class="text-slate-700 mt-1">-</p>
+                            </div>
+                            <div class="p-3 bg-rose-50/60 rounded-xl border border-rose-200">
+                                <span class="text-rose-700 font-semibold">Növbəti Öyrənilməli (Çatışmayan) Bacarıqlar:</span>
+                                <p id="missing-list" class="text-slate-700 mt-1">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ⏱️ Vaxt Hesablanması -->
+                    <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-hourglass-half text-indigo-600 text-xl"></i>
+                            <div>
+                                <div class="text-xs text-indigo-800 font-medium">Texniki Baza Üçün Təxmini Vaxt</div>
+                                <div id="estimated-time" class="text-sm font-bold text-indigo-950">0 Həftə</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 📚 Canlı Tədris Resursları -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-book-open text-blue-600"></i>
+                            Tövsiyə Olunan Tədris Resursları
+                        </h4>
+                        <ul id="resources-list" class="space-y-1.5 text-xs text-blue-600 font-medium">
+                            <li>- Resurslar burada göstəriləcək</li>
+                        </ul>
+                    </div>
+
+                    <!-- 💡 Müsahibəyə Hazırlıq Məsləhətləri -->
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-800 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-user-tie text-amber-600"></i>
+                            Müsahibəyə Hazırlıq Məsləhətləri
+                        </h4>
+                        <ul id="interview-tips-list" class="list-disc list-inside space-y-1 text-xs text-slate-600 bg-amber-50/50 p-3 rounded-xl border border-amber-200">
+                            <li>Müsahibə tövsiyələri daxil ediləcək</li>
+                        </ul>
+                    </div>
+
+                    <!-- 🚀 Fərdi Layihə İdeyası Və Addım-Addım Yol Xəritəsi -->
+                    <div class="p-4 bg-purple-50 border border-purple-200 rounded-xl space-y-2">
+                        <h4 class="text-xs font-bold text-purple-900 flex items-center gap-2">
+                            <i class="fa-solid fa-diagram-project text-purple-600"></i>
+                            CV-ni Gücləndirəcək Fərdi Layihə Plani:
+                        </h4>
+                        <div id="project-title" class="text-sm font-bold text-slate-800">--</div>
+                        <div id="project-stack" class="text-xs text-purple-700 font-semibold">--</div>
+                        <ul id="project-steps" class="list-disc list-inside text-xs text-slate-600 space-y-1 mt-2">
+                            <li>Addımlar yüklənir...</li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- BÖLMƏ 2: Avtomatik CV Generatoru Məlumat Daxiletmə Forması -->
+        <div id="section-cv" class="hidden max-w-3xl mx-auto card-bg p-8 rounded-2xl shadow-sm">
+            <div class="border-b border-slate-200 pb-4 mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-address-card text-blue-600"></i>
+                    Peşəkar CV Generatoru
+                </h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    Məlumatlarınızı daxil edin və dizayn olunmuş rəngli CV-nizi dərhal əldə edin!
+                </p>
+            </div>
+            
+            <form id="cv-form" class="space-y-4 text-sm" onsubmit="generateCV(event)">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Ad və Soyad</label>
+                        <input type="text" id="cv-name" value="Musayeva Gunel" class="w-full p-3 border rounded-xl border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">E-poçt / Əlaqə / Məkan</label>
+                        <input type="text" id="cv-contact" value="musayevagunel2007@gmail.com | Bakı, Azərbaycan" class="w-full p-3 border rounded-xl border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">İxtisas / Hədəf Vəzifə</label>
+                    <input type="text" id="cv-target-role" value="Kibertəhlükəsizlik mütəxəssisi" class="w-full p-3 border rounded-xl border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Haqqında / Peşəkar Xülasə (Summary)</label>
+                    <textarea id="cv-summary" rows="2" class="w-full p-3 border rounded-xl border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Özünüz haqqında qısa məlumat...">İT və Kibertəhlükəsizlik sahəsində biliklərini inkişaf etdirən, sistem təhlükəsizliyi və proqramlaşdırmaya marağı olan həvəsli kadr.</textarea>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">Təhsil Məlumatları</label>
+                    <textarea id="cv-education" rows="2" class="w-full p-3 border rounded-xl border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" required>UNEC - İnformasiya Texnologiyaları (İngilis bölməsi, 2-ci kurs)</textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Texniki Bacarıqlar (Vergüllə)</label>
+                        <input type="text" id="cv-skills" value="Python, Networking, Flask, Git, SQL, Linux" class="w-full p-3 border rounded-xl border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-slate-700 mb-1">Xarici Dillər (Vergüllə)</label>
+                        <input type="text" id="cv-languages" value="Azərbaycan dili (Ana dili), İngilis dili (B1-B2), Türk dili" class="w-full p-3 border rounded-xl border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-700 mb-1">İş / Könüllülük Təcrübəsi və Layihələr</label>
+                    <textarea id="cv-experience" rows="3" class="w-full p-3 border rounded-xl border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none" required>• ASAN Xidmət Könüllüsü
+• SkillVerse Career Matcher Proyekt Tərtibatçısı
+• Universitete aid bir neçə İT və analitika layihələrinin tərtibatçısı</textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    Rəngli Peşəkar CV-ni Hazırla
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- CV Modal Preview Panel (RƏNGLİ TWO-COLUMN CV ŞABLONU) -->
+    <div id="cv-modal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+        
+        <div class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden relative border border-slate-200 my-8" id="cv-modal-content">
+            
+            <!-- Modern Two-Column Layout -->
+            <div class="grid grid-cols-1 md:grid-cols-12 min-h-[600px]">
+                
+                <!-- Sol Sütun (Dark Modern Sidebar) -->
+                <div class="md:col-span-4 bg-slate-900 text-white p-6 space-y-6 flex flex-col justify-between">
+                    <div class="space-y-6">
+                        <!-- Profil Başlıq -->
+                        <div>
+                            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-2xl font-bold text-white mb-4 shadow-lg">
+                                GM
+                            </div>
+                            <h2 id="out-name" class="text-xl font-bold leading-tight text-white">--</h2>
+                            <p id="out-role" class="text-blue-400 font-medium text-xs mt-1 uppercase tracking-wider">--</p>
+                        </div>
+
+                        <!-- Əlaqə Məlumatları -->
+                        <div class="space-y-2 border-t border-slate-800 pt-4 text-xs">
+                            <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Əlaqə</h3>
+                            <div class="text-slate-300 break-words flex items-center gap-2">
+                                <i class="fa-solid fa-envelope text-blue-400"></i>
+                                <span id="out-contact">--</span>
+                            </div>
+                        </div>
+
+                        <!-- Dillər -->
+                        <div class="border-t border-slate-800 pt-4 text-xs">
+                            <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Xarici Dillər</h3>
+                            <ul id="out-languages" class="space-y-1.5 text-slate-300">
+                                <li>--</li>
+                            </ul>
+                        </div>
+
+                        <!-- Personal Skills -->
+                        <div class="border-t border-slate-800 pt-4 text-xs">
+                            <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Şəxsi Keyfiyyətlər</h3>
+                            <ul class="space-y-1 text-slate-300 list-disc list-inside text-[11px]">
+                                <li>Məsuliyyətli və dəqiq</li>
+                                <li>Komandada işləmə bacarığı</li>
+                                <li>Problem həll etmə kabiliyyəti</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="text-[10px] text-slate-500 pt-4 border-t border-slate-800 text-center">
+                        Generated by SkillVerse Platform
+                    </div>
+                </div>
+
+                <!-- Sağ Sütun (White Content Area) -->
+                <div class="md:col-span-8 p-6 sm:p-8 space-y-6 bg-white text-slate-800">
+                    
+                    <!-- Peşəkar Xülasə -->
+                    <div>
+                        <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center gap-2 border-b border-blue-100 pb-1">
+                            <i class="fa-solid fa-user text-blue-500"></i>
+                            Peşəkar Xülasə
+                        </h3>
+                        <p id="out-summary" class="text-xs text-slate-600 leading-relaxed">--</p>
+                    </div>
+
+                    <!-- Təhsil -->
+                    <div>
+                        <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center gap-2 border-b border-blue-100 pb-1">
+                            <i class="fa-solid fa-graduation-cap text-blue-500"></i>
+                            Təhsil
+                        </h3>
+                        <p id="out-education" class="text-xs text-slate-800 font-medium leading-relaxed">--</p>
+                    </div>
+
+                    <!-- Texniki Bacarıqlar -->
+                    <div>
+                        <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center gap-2 border-b border-blue-100 pb-1">
+                            <i class="fa-solid fa-code text-blue-500"></i>
+                            Texniki Bacarıqlar
+                        </h3>
+                        <div id="out-skills" class="flex flex-wrap gap-1.5 mt-2"></div>
+                    </div>
+
+                    <!-- Təcrübə & Layihələr -->
+                    <div>
+                        <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-2 flex items-center gap-2 border-b border-blue-100 pb-1">
+                            <i class="fa-solid fa-briefcase text-blue-500"></i>
+                            Təcrübə & Layihələr
+                        </h3>
+                        <div id="out-experience" class="text-xs text-slate-700 leading-relaxed whitespace-pre-line space-y-1">--</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Düymələr -->
+            <div class="flex gap-3 no-print p-4 bg-slate-50 border-t border-slate-200 justify-end">
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition flex items-center gap-2 cursor-pointer shadow-md">
+                    <i class="fa-solid fa-print"></i>
+                    PDF Kimi Yüklə / Çap Et
+                </button>
+                <button onclick="closeCVModal()" class="px-5 bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl font-semibold text-sm transition cursor-pointer">
+                    Bağla
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Məntiqi -->
+    <script>
+        let selectedRole = 'cybersecurity'; // Defolt seçilmiş peşə
+
+        function switchTab(tab) {
+            if(tab === 'matcher') {
+                document.getElementById('section-matcher').classList.remove('hidden');
+                document.getElementById('section-cv').classList.add('hidden');
+                document.getElementById('tab-matcher').className = "px-6 py-3 rounded-xl font-semibold bg-blue-600 text-white shadow-sm flex items-center gap-2 transition cursor-pointer";
+                document.getElementById('tab-cv').className = "px-6 py-3 rounded-xl font-semibold bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200 flex items-center gap-2 transition cursor-pointer";
+            } else {
+                document.getElementById('section-matcher').classList.add('hidden');
+                document.getElementById('section-cv').classList.remove('hidden');
+                document.getElementById('tab-cv').className = "px-6 py-3 rounded-xl font-semibold bg-blue-600 text-white shadow-sm flex items-center gap-2 transition cursor-pointer";
+                document.getElementById('tab-matcher').className = "px-6 py-3 rounded-xl font-semibold bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200 flex items-center gap-2 transition cursor-pointer";
+            }
+        }
+
+        function selectRole(roleKey, element) {
+            selectedRole = roleKey;
+            document.querySelectorAll('.role-card').forEach(el => el.classList.remove('selected-card'));
+            element.classList.add('selected-card');
+            calculateMatch();
+        }
+
+        async function calculateMatch() {
+            const btn = document.getElementById('calc-btn');
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Hesablanır...`;
+
+            const checkedSkills = Array.from(document.querySelectorAll('.skill-checkbox:checked')).map(cb => cb.value);
+
+            try {
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: selectedRole, skills: checkedSkills })
+                });
+
+                if (!response.ok) throw new Error('Server xətası');
+
+                const data = await response.json();
+
+                document.getElementById('role-title').innerText = data.role_title;
+                document.getElementById('role-desc').innerText = data.description;
+                document.getElementById('match-score').innerText = data.match_percentage + '%';
+
+                const circle = document.getElementById('progress-circle');
+                const circumference = 251.2;
+                circle.style.strokeDashoffset = circumference - (data.match_percentage / 100) * circumference;
+                circle.style.stroke = data.status_color;
+
+                const statusTag = document.getElementById('status-tag');
+                statusTag.innerText = data.status_tag;
+                statusTag.style.color = data.status_color;
+
+                document.getElementById('matched-list').innerText = data.matched_skills.length > 0 ? data.matched_skills.join(', ') : 'Heç biri seçilməyib';
+                document.getElementById('missing-list').innerText = data.missing_skills.length > 0 ? data.missing_skills.join(', ') : 'Təbriklər! Bütün tələb olunan bacarıqlara sahibsiniz.';
+
+                document.getElementById('estimated-time').innerText = data.estimated_time;
+
+                const resList = document.getElementById('resources-list');
+                resList.innerHTML = '';
+                if (data.resources && data.resources.length > 0) {
+                    data.resources.forEach(res => {
+                        resList.innerHTML += `<li><a href="${res.url}" target="_blank" class="hover:underline flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> ${res.title}</a></li>`;
+                    });
+                }
+
+                const tipsList = document.getElementById('interview-tips-list');
+                tipsList.innerHTML = '';
+                if (data.interview_tips && data.interview_tips.length > 0) {
+                    data.interview_tips.forEach(tip => {
+                        tipsList.innerHTML += `<li>${tip}</li>`;
+                    });
+                }
+
+                if (data.project_details && data.project_details.title) {
+                    document.getElementById('project-title').innerText = data.project_details.title;
+                    document.getElementById('project-stack').innerText = "İstifadə olunacaq alətlər: " + (data.project_details.stack || "");
+                    const stepsList = document.getElementById('project-steps');
+                    stepsList.innerHTML = '';
+                    (data.project_details.steps || []).forEach(step => {
+                        stepsList.innerHTML += `<li>${step}</li>`;
+                    });
+                }
+
+            } catch (err) {
+                console.error(err);
+            } finally {
+                btn.innerHTML = `<i class="fa-solid fa-calculator"></i> Uyğunluğu Hesabla`;
+            }
+        }
+
+        function generateCV(e) {
+            e.preventDefault();
+
+            document.getElementById('out-name').innerText = document.getElementById('cv-name').value;
+            document.getElementById('out-role').innerText = document.getElementById('cv-target-role').value;
+            document.getElementById('out-contact').innerText = document.getElementById('cv-contact').value;
+            document.getElementById('out-summary').innerText = document.getElementById('cv-summary').value;
+            document.getElementById('out-education').innerText = document.getElementById('cv-education').value;
+            document.getElementById('out-experience').innerText = document.getElementById('cv-experience').value;
+
+            const langsArr = document.getElementById('cv-languages').value.split(',');
+            const langContainer = document.getElementById('out-languages');
+            langContainer.innerHTML = '';
+            langsArr.forEach(l => {
+                if(l.trim()) {
+                    langContainer.innerHTML += `<li>${l.trim()}</li>`;
+                }
+            });
+
+            const skillsArr = document.getElementById('cv-skills').value.split(',');
+            const skillsContainer = document.getElementById('out-skills');
+            skillsContainer.innerHTML = '';
+            skillsArr.forEach(s => {
+                if(s.trim()) {
+                    skillsContainer.innerHTML += `<span class="px-2.5 py-1 bg-blue-50 border border-blue-200 text-blue-700 text-xs rounded-lg font-semibold shadow-sm">${s.trim()}</span>`;
+                }
+            });
+
+            document.getElementById('cv-modal').classList.remove('hidden');
+        }
+
+        function closeCVModal() {
+            document.getElementById('cv-modal').classList.add('hidden');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            calculateMatch();
+        });
+    </script>
+</body>
+</html>
